@@ -1,0 +1,40 @@
+# Example configuration for ClayTerratorch
+# Copy this to configs/source_to_target.yaml and edit for your use case
+
+source:
+  stac_api: "https://planetarycomputer.microsoft.com/api/stac/v1"
+  collection: "landsat-c2-l2"  # Landsat 8 Collection 2 Level 2
+  date_ranges:
+    "2023": "2023-01-01/2023-12-31"  # Single year example
+  allowed_months: [4, 5, 6, 7, 8, 9, 10]  # Growing season (NH)
+  max_catalog_cloud_cover: 10.0  # Max scene cloud cover to consider
+  max_alternates: 6              # How many alternative scenes to check per tile
+  query:
+    eo:cloud_cover:
+      lte: 10.0  # Require <=10% cloud cover in selected scene
+
+bands:
+  order: [red, green, blue, nir08, swir16, swir22]  # Standard Landsat 8 bands
+
+quality:
+  min_lulc_coverage_pct: 20.0  # Minimum % valid LULC pixels to keep tile
+  max_nodata_pct: 50.0         # Maximum % nodata pixels allowed
+  max_black_pct: 80.0          # Maximum % all-zero pixels allowed
+  max_blue_mean: 20000.0       # Blue band mean threshold to filter hazy scenes
+
+tiling:
+  tile_size: 256               # Size of square tiles (pixels)
+  stride: 128                  # Step between tiles (50% overlap)
+
+paths:
+  # Optional: constrain to specific AOI (shapefile with polygons)
+  aoi_shapefile: "data/raw/aoi.shp"
+
+  # LULC reference data (one file per year in date_ranges)
+  source_lulc:
+    "2023": "data/raw/lulc_reference_2023.tif"
+
+  # Where to save intermediate products
+  prepared_masks_dir: "data/processed/lulc_masks"      # Reprojected LULC masks
+  tiles_all_cubes_dir: "data/processed/tiles/all/cubes" # Analysis-ready cubes (.npz)
+  tiles_metadata_csv: "data/processed/tiles/all/tiles_metadata.csv" # CSV index

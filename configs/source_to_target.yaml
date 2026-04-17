@@ -1,0 +1,44 @@
+source:
+  stac_api: "https://planetarycomputer.microsoft.com/api/stac/v1"
+  collection: "landsat-c2-l2"
+  date_ranges:
+    "1985": "1984-01-01/1986-12-31"
+    "1995": "1994-01-01/1996-12-31"
+    "2005": "2004-01-01/2006-12-31"
+  allowed_months: [1, 2, 3, 4, 5, 6, 10, 11, 12]
+  max_catalog_cloud_cover: 20.0
+  max_alternates: 6
+  query:
+    eo:cloud_cover:
+      lte: 20.0
+
+bands:
+  order: [red, green, blue, nir08, swir16, swir22]
+
+quality:
+  min_lulc_coverage_pct: 50.0
+  max_nodata_pct: 35.0
+  max_black_pct: 50.0
+  max_blue_mean: 15000.0
+
+tiling:
+  tile_size: 224
+  stride: 224
+
+paths:
+  aoi_shapefile: "data/raw/uk_shape_files/uttarakhand_Boundary.shp"
+  source_lulc:
+    "1985": "data/raw/uk_decadal_LULC/Decadal_LULC_India_1336/data/LULC_1985.tif"
+    "1995": "data/raw/uk_decadal_LULC/Decadal_LULC_India_1336/data/LULC_1995.tif"
+    "2005": "data/raw/uk_decadal_LULC/Decadal_LULC_INDIA_1336/data/LULC_2005.tif"
+  prepared_masks_dir: "data/processed/lulc_masks"
+  tiles_all_cubes_dir: "data/processed/tiles/all/cubes"
+  tiles_metadata_csv: "data/processed/tiles/all/tiles_metadata.csv"
+
+crs:
+  target_epsg: "EPSG:32644"
+  output_res_m: 30
+
+training_target:
+  num_classes: 20
+  ignore_index: 0

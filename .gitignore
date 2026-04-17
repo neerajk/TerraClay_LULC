@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+venv/
+.env
+
+# OS
+.DS_Store
+
+# Data artifacts
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Training artifacts
+outputs/
+logs/
+checkpoints/
+*.ckpt
+*.pt
+*.pth
+
+# Notebook checkpoints
+.ipynb_checkpoints/

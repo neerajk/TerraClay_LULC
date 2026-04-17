@@ -1,0 +1,62 @@
+default_model: clay_lulc_best
+
+default_runtime: mac
+default_output_dir: outputs/predictions
+
+runtime_profiles:
+  mac:
+    description: "Apple Silicon or CPU laptop"
+    device: mps
+    cpu_only_legacy: true
+  gpu:
+    description: "Local CUDA workstation"
+    device: cuda
+    cpu_only_legacy: false
+  cloud:
+    description: "Cloud GPU server"
+    device: cuda
+    cpu_only_legacy: false
+
+models:
+  clay_lulc_best:
+    description: "Legacy clay_LULC predictor using best decoder checkpoint"
+    engine: legacy_clay_lulc
+    python: python
+    script: ../clay_LULC/scripts/06_predict_lulc_tif.py
+    clay_ckpt: ../clay_LULC/models/clay-v1.5.ckpt
+    decoder_ckpt: ../clay_LULC/models/checkpoints/decoder-epoch62-patch0.2981-full0.3019-vloss1.8387.ckpt
+    metadata_path: configs/metadata.yaml
+    platform: landsat-c2-l2
+    band_indices: "1,2,3,4,5,6"
+    tile_size: 256
+    stride: 128
+    batch_size:
+      mac: 4
+      gpu: 8
+      cloud: 16
+
+  terratorch_prithvi:
+    description: "TerraTorch predictor with Prithvi config + checkpoint"
+    engine: terratorch_large_scene
+    python: python
+    config: configs/terratorch_segmentation.yaml
+    ckpt: /path/to/terratorch_prithvi.ckpt
+    crop: 224
+    stride: 192
+    batch_size:
+      mac: 4
+      gpu: 8
+      cloud: 16
+
+  terratorch_dofa:
+    description: "TerraTorch predictor with DOFA backbone (set ckpt after training)"
+    engine: terratorch_large_scene
+    python: python
+    config: configs/terratorch_segmentation_dofa.yaml
+    ckpt: /path/to/terratorch_dofa.ckpt
+    crop: 224
+    stride: 192
+    batch_size:
+      mac: 4
+      gpu: 8
+      cloud: 16

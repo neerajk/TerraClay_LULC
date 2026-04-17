@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Sentinel-2 3D Globe Viewer</title>
+    
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    
+    <style>
+        /* Ensure the globe takes up the full screen */
+        html, body, #cesiumContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+        #info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(42, 42, 42, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 100;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div id="info-panel">
+        <h3>Sentinel-2 Globe</h3>
+        <p>Use the search bar in the top right to find specific locations.</p>
+        <p><i>Hold CTRL + Left Click and drag to tilt the 3D camera.</i></p>
+    </div>
+    
+    <div id="cesiumContainer"></div>
+
+    <script>
+        // 1. YOUR CESIUM ION TOKEN GOES HERE
+        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1YmY4MmRlMi01NjgyLTQ1ZmEtOWMwMC00NzEzYTAxNWU4MTgiLCJpZCI6NDEyODA1LCJpYXQiOjE3NzUxMjU0NjJ9.s0iMPU4CaKhAwTpU2BQ8U-cYiuEpMSetB5cZ1EPL6zA';
+
+        // 2. Initialize the 3D Globe (Updated syntax for Cesium 1.115)
+        const viewer = new Cesium.Viewer('cesiumContainer', {
+            terrain: Cesium.Terrain.fromWorldTerrain(),   // The modern 3D terrain syntax
+            geocoder: true,                               // Enables the Search Bar
+            baseLayerPicker: false,                       // Disable default layer picker
+            animation: false,                             // Hide timeline controls for a cleaner UI
+            timeline: false
+        });
+
+        // 3. Add the global Sentinel-2 Imagery Layer
+        const sentinel2Layer = viewer.imageryLayers.addImageryProvider(
+            new Cesium.IonImageryProvider({ assetId: 3954 }) 
+        );
+
+        // 4. Fly the camera to Dehradun
+        // Coordinates: Longitude 78.0322, Latitude 30.3165
+        viewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromDegrees(78.0322, 30.3165, 8000.0), // Lon, Lat, Altitude in meters
+            orientation: {
+                heading: Cesium.Math.toRadians(0.0),    // Look North
+                pitch: Cesium.Math.toRadians(-35.0),    // Tilt camera down at a 35-degree angle
+                roll: 0.0
+            },
+            duration: 3 // Animation duration in seconds
+        });
+    </script>
+</body>
+</html>
