@@ -91,7 +91,8 @@ def cmd_predict(args):
         "--stride", str(args.stride),
         "--batch-size", str(args.batch_size),
         "--num-classes", str(args.num_classes),
-        "--device", args.device
+        "--device", args.device,
+        "--prediction-method", args.prediction_method
     ]
     return run_command(cmd)
 
@@ -153,13 +154,29 @@ Examples:
   # Extract embeddings using CLAY
   clayterractorch extract-emb --config configs/source_to_target.yaml --checkpoint ../clay_LULC/models/clay-v1.5.ckpt
 
-  # Train segmentation head
-  clayterractorch train --config configs/terratorch_segmentation.yaml
+  # Train segmentation head (embedding-based - DEFAULT)
+  clayterractorch train --embedding-dir data/embeddings --output-dir outputs/training
 
-  # Predict LULC on a scene
+  # Predict LULC on a scene using bilinear upsampling (embedding-based head)
   clayterractorch predict --scene-tif /path/to/scene.tif --out-tif /path/to/output.tif \\
     --encoder-checkpoint ../clay_LULC/models/clay-v1.5.ckpt \\
-    --decoder-checkpoint /path/to/trained_decoder.ckpt
+    --decoder-checkpoint /path/to/trained_decoder.ckpt \\
+    --prediction-method bilinear
+
+  # Predict LULC on a scene using internal Terratorch decoder
+  clayterractorch predict --scene-tif /path/to/scene.tif --out-tif /path/to/output.tif \\
+    --encoder-checkpoint /path/to/terratorch_model.ckpt \\
+    --decoder-checkpoint /path/to/terratorch_decoder.ckpt \\
+    --encoder-type terratorch \\
+    --prediction-method internal
+
+  # Predict LULC using standard Terratorch training (alternative approach)
+  clayterractorch train --config configs/terratorch_segmentation.yaml --standard
+  clayterractorch predict --scene-tif /path/to/scene.tif --out-tif /path/to/output.tif \\
+    --encoder-checkpoint /path/to/terratorch_encoder.ckpt \\
+    --decoder-checkpoint /path/to/terratorch_decoder.ckpt \\
+    --encoder-type terratorch \\
+    --prediction-method internal
         """
     )
 
@@ -199,9 +216,10 @@ Examples:
                              help="Path to Terratorch configuration file (for standard training)")
     train_parser.add_argument("--platform", type=str, default=None,
                              help="Platform for stats synchronization (e.g., landsat-c2-l2)")
-    # Embedding-based training options
-    train_parser.add_argument("--embedding-based", action="store_true",
-                             help="Use embedding-based training instead of standard TerraTorch training")
+    # Standard training options (use --standard to select this)
+    train_parser.add_argument("--standard", action="store_true",
+                             help="Use standard TerraTorch training instead of embedding-based training")
+    # Embedding-based training options (DEFAULT)
     train_parser.add_argument("--embedding-dir", type=str, default="data/embeddings",
                              help="Directory containing extracted embeddings (for embedding-based training)")
     train_parser.add_argument("--output-dir", type=str, default="outputs/embedding_training",
@@ -252,6 +270,8 @@ Examples:
                                help="Number of LULC classes")
     predict_parser.add_argument("--device", default="auto",
                                help="Device to use (auto, cpu, cuda, mps)")
+    predict_parser.add_argument("--prediction-method", choices=["bilinear", "internal"], default="bilinear",
+                               help="Prediction method: bilinear (upsample embeddings) or internal (use Terratorch decoder)")
     predict_parser.set_defaults(func=cmd_predict)
 
     args = parser.parse_args()

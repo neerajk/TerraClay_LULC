@@ -108,22 +108,25 @@ Output: `data/embeddings/YEAR/emb_*.npz`
 
 ### 4. Train Model
 
+#### Default: Embedding-based training (recommended for efficiency)
 ```bash
-# Option A: Embedding-based training (recommended for efficiency)
 clayterractorch train \
-  --embedding-based \
   --embedding-dir data/embeddings \
   --output-dir outputs/training \
   --max-epochs 50
+```
 
-# Option B: Standard TerraTorch training (uses raw pixels)
+#### Option: Standard TerraTorch training (uses raw pixels)
+```bash
 clayterractorch train \
-  --config configs/terratorch_segmentation.yaml
+  --config configs/terratorch_segmentation.yaml \
+  --standard
 ```
 Output: `outputs/training/*.ckpt`
 
 ### 5. Predict on New Scene
 
+#### Option A: Embedding-based Prediction (with bilinear upsampling)
 ```bash
 clayterractorch predict \
   --scene-tif /path/to/input_scene.tif \
@@ -132,7 +135,20 @@ clayterractorch predict \
   --decoder-checkpoint /path/to/best_training_model.ckpt \
   --tile-size 256 \
   --stride 128 \
-  --batch-size 16
+  --batch-size 16 \
+  --prediction-method bilinear
+```
+Output: Multi-class probability GeoTIFF (20 bands for 20 LULC classes)
+
+#### Option B: Internal Terratorch Decoder Prediction
+```bash
+clayterractorch predict \
+  --scene-tif /path/to/input_scene.tif \
+  --out-tif /path/to/output_lulc.tif \
+  --encoder-checkpoint /path/to/terratorch_encoder.ckpt \
+  --decoder-checkpoint /path/to/terratorch_decoder.ckpt \
+  --encoder-type terratorch \
+  --prediction-method internal
 ```
 Output: Multi-class probability GeoTIFF (20 bands for 20 LULC classes)
 
