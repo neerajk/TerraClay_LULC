@@ -48,6 +48,19 @@ models:
       gpu: 8
       cloud: 16
 
+  terratorch_clay:
+    description: "TerraTorch + Clay v1.5 encoder + UNetDecoder (freeze backbone)"
+    engine: terratorch_large_scene
+    python: python
+    config: configs/terratorch_segmentation_clay.yaml
+    ckpt: /path/to/terratorch_clay_best.ckpt
+    crop: 224
+    stride: 192
+    batch_size:
+      mac: 4
+      gpu: 8
+      cloud: 16
+
   terratorch_dofa:
     description: "TerraTorch predictor with DOFA backbone (set ckpt after training)"
     engine: terratorch_large_scene
